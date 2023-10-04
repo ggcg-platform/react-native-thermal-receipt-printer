@@ -278,6 +278,23 @@ _Note:_ get list device for net printers is support scanning in local ip but not
     )
   }
 
-  ...
+```
+### With Encoder
+
+```ts
+  import EscPosEncoder from 'esc-pos-encoder';
+import { errors } from '@sideway/address';
+
+const encoder = new EscPosEncoder();
+
+const printBillTest = () => {
+	const encoderResult = encoder
+		.codepage('windows1251')
+		.text('Iñtërnâtiônàlizætiøn')
+		.codepage('cp737')
+		.text('ξεσκεπάζω την ψυχοφθόρα βδελυγμία')
+		.encode();
+	BLEPrinter.printRawData(encoderResult, (error: Error) => console.log('error callback: ', error));
+};
 
 ```

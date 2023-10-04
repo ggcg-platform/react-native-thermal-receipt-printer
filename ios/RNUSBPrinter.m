@@ -45,6 +45,13 @@ RCT_EXPORT_METHOD(printRawData:(NSString *)text
     errorCallback(@[@"This function is not supported"]);
 }
 
+RCT_EXPORT_METHOD(printHex:(NSString *)text
+                  printerOptions:(NSDictionary *)options
+                  fail:(RCTResponseSenderBlock)errorCallback) {
+    // TODO
+    errorCallback(@[@"This function is not supported"]);
+}
+
 RCT_EXPORT_METHOD(closeConn) {
     // TODO
 }
