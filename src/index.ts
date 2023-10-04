@@ -211,31 +211,25 @@ export const BLEPrinter = {
 
 	printRawData: (data: Uint8Array, onError: (error: Error) => void = () => {
 	}) => {
-		RNBLEPrinter.printRawData(bytesToString(data, 'base64'), (error: Error) => {
-				if (onError) {
-					onError(error);
-				}
-			},
-		);
-		// if (Platform.OS === 'ios') {
-		// 	const processedText = bytesToString(data, 'hex');
-		// 	RNBLEPrinter.printHex(
-		// 		processedText,
-		// 		{ beep: true, cut: true },
-		// 		(error: Error) => {
-		// 			if (onError) {
-		// 				onError(error);
-		// 			}
-		// 		},
-		// 	);
-		// } else {
-		// 	RNBLEPrinter.printRawData(bytesToString(data, 'base64'), (error: Error) => {
-		// 			if (onError) {
-		// 				onError(error);
-		// 			}
-		// 		},
-		// 	);
-		// }
+		if (Platform.OS === 'ios') {
+			const processedText = bytesToString(data, 'hex');
+			RNBLEPrinter.printHex(
+				processedText,
+				{ beep: true, cut: true },
+				(error: Error) => {
+					if (onError) {
+						onError(error);
+					}
+				},
+			);
+		} else {
+			RNBLEPrinter.printRawData(bytesToString(data, 'base64'), (error: Error) => {
+					if (onError) {
+						onError(error);
+					}
+				},
+			);
+		}
 	},
 
 	// printImage: async (imagePath: string) => {
