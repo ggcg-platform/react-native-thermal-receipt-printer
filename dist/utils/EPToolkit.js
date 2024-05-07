@@ -91,13 +91,13 @@ export function exchange_text(text, options) {
                 }
                 break;
             case "\n":
-                temp = "" + temp + ch;
+                temp = "".concat(temp).concat(ch);
                 bytes.concat(iconv.encode(temp, m_options.encoding));
                 bytes.concat(reset_bytes);
                 temp = "";
                 break;
             default:
-                temp = "" + temp + ch;
+                temp = "".concat(temp).concat(ch);
                 break;
         }
     }
@@ -106,17 +106,14 @@ export function exchange_text(text, options) {
     if (typeof m_options["tailingLine"] === "boolean" && options_controller["tailingLine"]) {
         bytes.concat(options_controller["tailingLine"]);
     }
-
     // check for "cut" flag
     if (typeof m_options["cut"] === "boolean" && options_controller["cut"]) {
         bytes.concat(options_controller["cut"]);
     }
-
     // check for "beep" flag
     if (typeof m_options["beep"] === "boolean" && options_controller["beep"]) {
         bytes.concat(options_controller["beep"]);
     }
-
     return bytes.toBuffer();
 }
 // export async function exchange_image(
