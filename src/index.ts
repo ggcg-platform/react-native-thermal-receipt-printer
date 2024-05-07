@@ -232,6 +232,14 @@ export const BLEPrinter = {
 		}
 	},
 
+	printImage: async (imagePath: string) => {
+		await RNBLEPrinter.printImageData(imagePath, (error: Error) => console.warn(error));
+	},
+
+	printQrCode: async (qrText: string) => {
+		await RNBLEPrinter.printQrCode(qrText);
+	},
+
 	// printImage: async (imagePath: string) => {
 	//   const tmp = await imageToBuffer(imagePath);
 	//   RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
