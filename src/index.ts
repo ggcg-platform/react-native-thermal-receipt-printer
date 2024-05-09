@@ -3,6 +3,7 @@ import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
 import * as EPToolkit from './utils/EPToolkit';
 import BufferHelper from './utils/buffer-helper';
 import { Buffer } from 'buffer';
+import { encode } from 'base-64';
 
 const RNUSBPrinter = NativeModules.RNUSBPrinter;
 const RNBLEPrinter = NativeModules.RNBLEPrinter;
@@ -37,6 +38,16 @@ const bytesToString = (data: Uint8Array, type: 'base64' | 'hex') => {
 	bytes.concat(Buffer.from(data));
 	const buffer = bytes.toBuffer();
 	return buffer.toString(type);
+};
+
+const arrayBufferToBase64 = (buffer: ArrayBufferLike) => {
+	let binary = '';
+	let bytes = new Uint8Array(buffer);
+	let len = bytes.byteLength;
+	for (let i = 0; i < len; i++) {
+		binary += String.fromCharCode(bytes[i]);
+	}
+	return encode(binary);
 };
 
 const textTo64Buffer = (text: string, opts: PrinterOptions) => {
@@ -145,6 +156,11 @@ export const USBPrinter = {
 			},
 		);
 	},
+
+	printRawImage: async (imageData: ArrayBufferLike) => {
+		const tmp = arrayBufferToBase64(imageData);
+		RNUSBPrinter.printRawData(tmp, (error: Error) => console.warn(error));
+	},
 };
 
 export const BLEPrinter = {
@@ -232,18 +248,10 @@ export const BLEPrinter = {
 		}
 	},
 
-	printImage: async (imagePath: string) => {
-		await RNBLEPrinter.printImageData(imagePath, (error: Error) => console.warn(error));
+	printRawImage: async (imageData: ArrayBufferLike) => {
+		const tmp = arrayBufferToBase64(imageData);
+		RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
-
-	printQrCode: async (qrText: string) => {
-		await RNBLEPrinter.printQrCode(qrText);
-	},
-
-	// printImage: async (imagePath: string) => {
-	//   const tmp = await imageToBuffer(imagePath);
-	//   RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
-	// },
 };
 
 export const NetPrinter = {
@@ -330,6 +338,11 @@ export const NetPrinter = {
 				},
 			);
 		}
+	},
+
+	printRawImage: async (imageData: ArrayBufferLike) => {
+		const tmp = arrayBufferToBase64(imageData);
+		RNNetPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 };
 

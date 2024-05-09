@@ -49,6 +49,7 @@ import { NativeModules, NativeEventEmitter, Platform } from 'react-native';
 import * as EPToolkit from './utils/EPToolkit';
 import BufferHelper from './utils/buffer-helper';
 import { Buffer } from 'buffer';
+import { encode } from 'base-64';
 var RNUSBPrinter = NativeModules.RNUSBPrinter;
 var RNBLEPrinter = NativeModules.RNBLEPrinter;
 var RNNetPrinter = NativeModules.RNNetPrinter;
@@ -57,6 +58,15 @@ var bytesToString = function (data, type) {
     bytes.concat(Buffer.from(data));
     var buffer = bytes.toBuffer();
     return buffer.toString(type);
+};
+var arrayBufferToBase64 = function (buffer) {
+    var binary = '';
+    var bytes = new Uint8Array(buffer);
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return encode(binary);
 };
 var textTo64Buffer = function (text, opts) {
     var defaultOptions = {
@@ -144,6 +154,14 @@ export var USBPrinter = {
             }
         });
     },
+    printRawImage: function (imageData) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
+        return __generator(this, function (_a) {
+            tmp = arrayBufferToBase64(imageData);
+            RNUSBPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+            return [2 /*return*/];
+        });
+    }); },
 };
 export var BLEPrinter = {
     init: function () {
@@ -210,30 +228,14 @@ export var BLEPrinter = {
             });
         }
     },
-    printImage: function (imagePath) { return __awaiter(void 0, void 0, void 0, function () {
+    printRawImage: function (imageData) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
         return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, RNBLEPrinter.printImageData(imagePath, function (error) { return console.warn(error); })];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
+            tmp = arrayBufferToBase64(imageData);
+            RNBLEPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+            return [2 /*return*/];
         });
     }); },
-    printQrCode: function (qrText) { return __awaiter(void 0, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, RNBLEPrinter.printQrCode(qrText)];
-                case 1:
-                    _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    }); },
-    // printImage: async (imagePath: string) => {
-    //   const tmp = await imageToBuffer(imagePath);
-    //   RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
-    // },
 };
 export var NetPrinter = {
     init: function () {
@@ -300,6 +302,14 @@ export var NetPrinter = {
             });
         }
     },
+    printRawImage: function (imageData) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
+        return __generator(this, function (_a) {
+            tmp = arrayBufferToBase64(imageData);
+            RNNetPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+            return [2 /*return*/];
+        });
+    }); },
 };
 export var NetPrinterEventEmitter = new NativeEventEmitter(RNNetPrinter);
 export var RN_THERMAL_RECEIPT_PRINTER_EVENTS;
