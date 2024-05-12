@@ -97,10 +97,20 @@ var textPreprocessingIOS = function (text) {
         opts: options,
     };
 };
-// const imageToBuffer = async (imagePath: string, threshold: number = 60) => {
-//   const buffer = await EPToolkit.exchange_image(imagePath, threshold);
-//   return buffer.toString("base64");
-// };
+var imageToBuffer = function (imagePath, threshold) {
+    if (threshold === void 0) { threshold = 60; }
+    return __awaiter(void 0, void 0, void 0, function () {
+        var buffer;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, EPToolkit.exchange_image(imagePath, threshold)];
+                case 1:
+                    buffer = _a.sent();
+                    return [2 /*return*/, buffer.toString('base64')];
+            }
+        });
+    });
+};
 export var USBPrinter = {
     init: function () {
         return new Promise(function (resolve, reject) {
@@ -144,10 +154,16 @@ export var USBPrinter = {
             }
         });
     },
-    printRawImage: function (base64) { return __awaiter(void 0, void 0, void 0, function () {
+    printImage: function (imagePath) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
         return __generator(this, function (_a) {
-            RNUSBPrinter.printRawData(base64, function (error) { return console.warn(error); });
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, imageToBuffer(imagePath)];
+                case 1:
+                    tmp = _a.sent();
+                    RNUSBPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+                    return [2 /*return*/];
+            }
         });
     }); },
 };
@@ -216,10 +232,16 @@ export var BLEPrinter = {
             });
         }
     },
-    printRawImage: function (base64) { return __awaiter(void 0, void 0, void 0, function () {
+    printImage: function (imagePath) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
         return __generator(this, function (_a) {
-            RNBLEPrinter.printRawData(base64, function (error) { return console.warn(error); });
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, imageToBuffer(imagePath)];
+                case 1:
+                    tmp = _a.sent();
+                    RNBLEPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+                    return [2 /*return*/];
+            }
         });
     }); },
 };
@@ -288,10 +310,16 @@ export var NetPrinter = {
             });
         }
     },
-    printRawImage: function (base64) { return __awaiter(void 0, void 0, void 0, function () {
+    printImage: function (imagePath) { return __awaiter(void 0, void 0, void 0, function () {
+        var tmp;
         return __generator(this, function (_a) {
-            RNNetPrinter.printRawData(base64, function (error) { return console.warn(error); });
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, imageToBuffer(imagePath)];
+                case 1:
+                    tmp = _a.sent();
+                    RNNetPrinter.printRawData(tmp, function (error) { return console.warn(error); });
+                    return [2 /*return*/];
+            }
         });
     }); },
 };

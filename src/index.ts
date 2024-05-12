@@ -88,10 +88,10 @@ const textPreprocessingIOS = (text: string) => {
 	};
 };
 
-// const imageToBuffer = async (imagePath: string, threshold: number = 60) => {
-//   const buffer = await EPToolkit.exchange_image(imagePath, threshold);
-//   return buffer.toString("base64");
-// };
+const imageToBuffer = async (imagePath: string, threshold: number = 60) => {
+	const buffer = await EPToolkit.exchange_image(imagePath, threshold);
+	return buffer.toString('base64');
+};
 
 export const USBPrinter = {
 	init: (): Promise<void> =>
@@ -146,8 +146,9 @@ export const USBPrinter = {
 		);
 	},
 
-	printRawImage: async (base64: string) => {
-		RNUSBPrinter.printRawData(base64, (error: Error) => console.warn(error));
+	printImage: async (imagePath: string) => {
+	  const tmp = await imageToBuffer(imagePath);
+	  RNUSBPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 };
 
@@ -236,8 +237,9 @@ export const BLEPrinter = {
 		}
 	},
 
-	printRawImage: async (base64: string) => {
-		RNBLEPrinter.printRawData(base64, (error: Error) => console.warn(error));
+	printImage: async (imagePath: string) => {
+		const tmp = await imageToBuffer(imagePath);
+		RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 };
 
@@ -327,8 +329,9 @@ export const NetPrinter = {
 		}
 	},
 
-	printRawImage: async (base64: string) => {
-		RNNetPrinter.printRawData(base64, (error: Error) => console.warn(error));
+	printImage: async (imagePath: string) => {
+		const tmp = await imageToBuffer(imagePath);
+		RNNetPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 };
 
