@@ -84,24 +84,52 @@ public class USBPrinterAdapter implements PrinterAdapter {
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
-                    UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    // For Android 14+, use getParcelableExtra with the correct class
+                    UsbDevice usbDevice;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
+                    } else {
+                        usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    }
+
+                    // Check for null before accessing device properties
+                    if (usbDevice == null) {
+                        Log.e(LOG_TAG, "Failed to get USB device from intent");
+                        return;
+                    }
+
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        Log.i(LOG_TAG, "success to grant permission for device " + usbDevice.getDeviceId() + ", vendor_id: " + usbDevice.getVendorId() + " product_id: " + usbDevice.getProductId());
+                        Log.i(LOG_TAG, "Success to grant permission for device " + 
+                            usbDevice.getDeviceId() + ", vendor_id: " + 
+                            usbDevice.getVendorId() + " product_id: " + 
+                            usbDevice.getProductId());
                         mUsbDevice = usbDevice;
                     } else {
-                        Toast.makeText(context, "User refuses to obtain USB device permissions" + usbDevice.getDeviceName(), Toast.LENGTH_LONG).show();
+                        Log.e(LOG_TAG, "Permission denied for device " + usbDevice.getDeviceName());
                     }
                 }
             } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                if (mUsbDevice != null) {
-                    Toast.makeText(context, "USB device has been turned off", Toast.LENGTH_LONG).show();
-                    closeConnectionIfExists();
+                synchronized (this) {
+                    UsbDevice device;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, UsbDevice.class);
+                    } else {
+                        device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                    }
+
+                    if (device != null && mUsbDevice != null && device.getDeviceId() == mUsbDevice.getDeviceId()) {
+                        Log.i(LOG_TAG, "USB device detached");
+                        closeConnectionIfExists();
+                        mUsbDevice = null;
+                    }
                 }
-            } else if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action) || UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+            } else if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action) || 
+                      UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                 synchronized (this) {
                     if (mContext != null) {
-                        ((ReactApplicationContext) mContext).getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                .emit(EVENT_USB_DEVICE_ATTACHED, null);
+                        ((ReactApplicationContext) mContext).getJSModule(
+                            DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                            .emit(EVENT_USB_DEVICE_ATTACHED, null);
                     }
                 }
             }
