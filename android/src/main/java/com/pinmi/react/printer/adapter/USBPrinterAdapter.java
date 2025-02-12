@@ -112,11 +112,9 @@ public class USBPrinterAdapter implements PrinterAdapter {
         this.mContext = reactContext;
         this.mUSBManager = (UsbManager) this.mContext.getSystemService(Context.USB_SERVICE);
         
-        // Create an explicit intent by specifying the package
         Intent permissionIntent = new Intent(ACTION_USB_PERMISSION);
         permissionIntent.setPackage(mContext.getPackageName());
         
-        // Use FLAG_IMMUTABLE for Android 14 compatibility
         this.mPermissionIndent = PendingIntent.getBroadcast(
             mContext, 
             0, 
@@ -128,7 +126,13 @@ public class USBPrinterAdapter implements PrinterAdapter {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         filter.addAction(UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
-        mContext.registerReceiver(mUsbDeviceReceiver, filter);
+
+        // Use Context.RECEIVER_NOT_EXPORTED for Android 14 compatibility
+        mContext.registerReceiver(
+            mUsbDeviceReceiver, 
+            filter,
+            Context.RECEIVER_NOT_EXPORTED
+        );
         
         Log.v(LOG_TAG, "RNUSBPrinter initialized");
         successCallback.invoke();
