@@ -199,37 +199,49 @@ public class USBPrinterAdapter implements PrinterAdapter {
         }
 
         USBPrinterDeviceId usbPrinterDeviceId = (USBPrinterDeviceId) printerDeviceId;
-        if (mUsbDevice != null && mUsbDevice.getVendorId() == usbPrinterDeviceId.getVendorId() && mUsbDevice.getProductId() == usbPrinterDeviceId.getProductId()) {
-            Log.i(LOG_TAG, "already selected device, do not need repeat to connect");
-            if(!mUSBManager.hasPermission(mUsbDevice)){
+        
+        // First check if we already have this device
+        if (mUsbDevice != null && 
+            mUsbDevice.getVendorId() == usbPrinterDeviceId.getVendorId() && 
+            mUsbDevice.getProductId() == usbPrinterDeviceId.getProductId()) {
+            
+            Log.i(LOG_TAG, "Device already selected, checking permissions");
+            if (!mUSBManager.hasPermission(mUsbDevice)) {
+                Log.i(LOG_TAG, "Requesting permission for already selected device");
                 closeConnectionIfExists();
                 mUSBManager.requestPermission(mUsbDevice, mPermissionIndent);
+            } else {
+                Log.i(LOG_TAG, "Already have permission for the device");
             }
             successCallback.invoke(new USBPrinterDevice(mUsbDevice).toRNWritableMap());
             return;
         }
-        closeConnectionIfExists();
+
+        // Look for the device in the device list
         if (mUSBManager.getDeviceList().size() == 0) {
-            errorCallback.invoke("Device list is empty, can not choose device");
+            errorCallback.invoke("No USB devices found");
             return;
         }
+
         for (UsbDevice usbDevice : mUSBManager.getDeviceList().values()) {
-            if (usbDevice.getVendorId() == usbPrinterDeviceId.getVendorId() && usbDevice.getProductId() == usbPrinterDeviceId.getProductId()) {
-                Log.v(LOG_TAG, "request for device: vendor_id: " + usbPrinterDeviceId.getVendorId() + ", product_id: " + usbPrinterDeviceId.getProductId());
+            if (usbDevice.getVendorId() == usbPrinterDeviceId.getVendorId() && 
+                usbDevice.getProductId() == usbPrinterDeviceId.getProductId()) {
+                
+                Log.i(LOG_TAG, "Found matching device, requesting permission");
                 closeConnectionIfExists();
+                mUsbDevice = usbDevice; // Store the device before requesting permission
                 mUSBManager.requestPermission(usbDevice, mPermissionIndent);
                 successCallback.invoke(new USBPrinterDevice(usbDevice).toRNWritableMap());
                 return;
             }
         }
 
-        errorCallback.invoke("can not find specified device");
-        return;
+        errorCallback.invoke("Could not find specified USB device");
     }
 
     private boolean openConnection() {
         if (mUsbDevice == null) {
-            Log.e(LOG_TAG, "USB Deivce is not initialized");
+            Log.e(LOG_TAG, "USB Device is not initialized");
             return false;
         }
         if (mUSBManager == null) {
@@ -238,36 +250,48 @@ public class USBPrinterAdapter implements PrinterAdapter {
         }
 
         if (mUsbDeviceConnection != null) {
-            Log.i(LOG_TAG, "USB Connection already connected");
+            Log.i(LOG_TAG, "USB Connection already exists");
             return true;
         }
 
+        if (!mUSBManager.hasPermission(mUsbDevice)) {
+            Log.e(LOG_TAG, "No permission to access USB device");
+            return false;
+        }
+
         UsbInterface usbInterface = mUsbDevice.getInterface(0);
+        if (usbInterface == null) {
+            Log.e(LOG_TAG, "Could not get USB interface");
+            return false;
+        }
+
         for (int i = 0; i < usbInterface.getEndpointCount(); i++) {
             final UsbEndpoint ep = usbInterface.getEndpoint(i);
             if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
                 if (ep.getDirection() == UsbConstants.USB_DIR_OUT) {
                     UsbDeviceConnection usbDeviceConnection = mUSBManager.openDevice(mUsbDevice);
                     if (usbDeviceConnection == null) {
-                        Log.e(LOG_TAG, "failed to open USB Connection");
+                        Log.e(LOG_TAG, "Could not open USB connection");
                         return false;
                     }
-                    if (usbDeviceConnection.claimInterface(usbInterface, true)) {
 
+                    if (usbDeviceConnection.claimInterface(usbInterface, true)) {
                         mEndPoint = ep;
                         mUsbInterface = usbInterface;
                         mUsbDeviceConnection = usbDeviceConnection;
-                        Log.i(LOG_TAG, "Device connected");
+                        Log.i(LOG_TAG, "Successfully opened USB connection");
                         return true;
                     } else {
                         usbDeviceConnection.close();
-                        Log.e(LOG_TAG, "failed to claim usb connection");
+                        Log.e(LOG_TAG, "Could not claim USB interface");
                         return false;
                     }
                 }
             }
         }
-        return true;
+
+        Log.e(LOG_TAG, "Could not find appropriate USB endpoint");
+        return false;
     }
 
 
