@@ -77,7 +77,12 @@ public class RNUSBPrinterModule extends ReactContextBaseJavaModule implements RN
 
     @ReactMethod
     public void connectPrinter(Integer vendorId, Integer productId, Callback successCallback, Callback errorCallback) {
-        adapter.selectDevice(USBPrinterDeviceId.valueOf(vendorId, productId), successCallback, errorCallback);
+        USBPrinterDeviceId deviceId = USBPrinterDeviceId.valueOf(vendorId, productId);
+        if (deviceId == null) {
+            errorCallback.invoke("Invalid Vendor ID or Product ID");
+            return;
+        }
+        adapter.selectDevice(deviceId, successCallback, errorCallback);
     }
 
     @Override
