@@ -16,7 +16,10 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/**/*.{h,m}"
   s.requires_arc = true
   s.ios.vendored_libraries = "ios/PrinterSDK/libPrinterSDK.a"
-  s.xcconfig = { 'HEADER_SEARCH_PATHS' => '"${PROJECT_DIR}/PrinterSDK"/**' }
+  s.xcconfig = { 
+    'HEADER_SEARCH_PATHS' => '"${PROJECT_DIR}/PrinterSDK"/**',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64'
+  }
 
   s.dependency 'React'
 end
