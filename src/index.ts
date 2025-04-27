@@ -184,35 +184,70 @@ export const BLEPrinter = {
 			resolve();
 		}),
 
-	printText: (text: string, opts: PrinterOptions = {}): void => {
-		if (Platform.OS === 'ios') {
-			const processedText = textPreprocessingIOS(text);
-			RNBLEPrinter.printRawData(
-				processedText.text,
-				processedText.opts,
-				(error: Error) => console.warn(error),
-			);
-		} else {
-			RNBLEPrinter.printRawData(textTo64Buffer(text, opts), (error: Error) =>
-				console.warn(error),
-			);
-		}
-	},
+		printText: (text: string, opts: PrinterOptions = {}): Promise<void> => {
+			return new Promise((resolve, reject) => {
+			  if (Platform.OS === 'ios') {
+				const processedText = textPreprocessingIOS(text);
+				RNBLEPrinter.printRawData(
+				  processedText.text,
+				  processedText.opts,
+				  (error: Error) => {
+					if (error) {
+					  console.warn("printText error (iOS):", error);
+					  reject(error);
+					} else {
+					  resolve();
+					}
+				  }
+				);
+			  } else {
+				RNBLEPrinter.printRawData(
+				  textTo64Buffer(text, opts),
+				  (error: Error) => {
+					if (error) {
+					  console.warn("printText error (Android):", error);
+					  reject(error);
+					} else {
+					  resolve();
+					}
+				  }
+				);
+			  }
+			});
+		  },
 
-	printBill: (text: string, opts: PrinterOptions = {}): void => {
-		if (Platform.OS === 'ios') {
-			const processedText = textPreprocessingIOS(text);
-			RNBLEPrinter.printRawData(
-				processedText.text,
-				processedText.opts,
-				(error: Error) => console.warn(error),
-			);
-		} else {
-			RNBLEPrinter.printRawData(billTo64Buffer(text, opts), (error: Error) =>
-				console.warn(error),
-			);
-		}
-	},
+		  printBill: (text: string, opts: PrinterOptions = {}): Promise<void> => {
+			return new Promise((resolve, reject) => {
+			  if (Platform.OS === 'ios') {
+				const processedText = textPreprocessingIOS(text);
+				RNBLEPrinter.printRawData(
+				  processedText.text,
+				  processedText.opts,
+				  (error: Error) => {
+					if (error) {
+					  console.warn("printBill error (iOS):", error);
+					  reject(error);
+					} else {
+					  resolve();
+					}
+				  }
+				);
+			  } else {
+				RNBLEPrinter.printRawData(
+				  billTo64Buffer(text, opts),
+				  (error: Error) => {
+					if (error) {
+					  console.warn("printBill error (Android):", error);
+					  reject(error);
+					} else {
+					  resolve();
+					}
+				  }
+				);
+			  }
+			});
+		  },
+		  
 
 	printRawData: (data: Uint8Array, onError: (error: Error) => void = () => {
 	}) => {
