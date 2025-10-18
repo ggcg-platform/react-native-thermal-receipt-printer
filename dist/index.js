@@ -166,6 +166,19 @@ export var USBPrinter = {
             }
         });
     }); },
+    printQrCode: function (qrCode) {
+        return new Promise(function (resolve, reject) {
+            return RNUSBPrinter.printQrCode(qrCode, function (error) {
+                if (error) {
+                    console.warn("printQrCode error:", error);
+                    reject(error);
+                }
+                else {
+                    resolve();
+                }
+            });
+        });
+    },
 };
 export var BLEPrinter = {
     init: function () {
@@ -191,27 +204,59 @@ export var BLEPrinter = {
     },
     printText: function (text, opts) {
         if (opts === void 0) { opts = {}; }
-        if (Platform.OS === 'ios') {
-            var processedText = textPreprocessingIOS(text);
-            RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) { return console.warn(error); });
-        }
-        else {
-            RNBLEPrinter.printRawData(textTo64Buffer(text, opts), function (error) {
-                return console.warn(error);
-            });
-        }
+        return new Promise(function (resolve, reject) {
+            if (Platform.OS === 'ios') {
+                var processedText = textPreprocessingIOS(text);
+                RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) {
+                    if (error) {
+                        console.warn("printText error (iOS):", error);
+                        reject(error);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+            else {
+                RNBLEPrinter.printRawData(textTo64Buffer(text, opts), function (error) {
+                    if (error) {
+                        console.warn("printText error (Android):", error);
+                        reject(error);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+        });
     },
     printBill: function (text, opts) {
         if (opts === void 0) { opts = {}; }
-        if (Platform.OS === 'ios') {
-            var processedText = textPreprocessingIOS(text);
-            RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) { return console.warn(error); });
-        }
-        else {
-            RNBLEPrinter.printRawData(billTo64Buffer(text, opts), function (error) {
-                return console.warn(error);
-            });
-        }
+        return new Promise(function (resolve, reject) {
+            if (Platform.OS === 'ios') {
+                var processedText = textPreprocessingIOS(text);
+                RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) {
+                    if (error) {
+                        console.warn("printBill error (iOS):", error);
+                        reject(error);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+            else {
+                RNBLEPrinter.printRawData(billTo64Buffer(text, opts), function (error) {
+                    if (error) {
+                        console.warn("printBill error (Android):", error);
+                        reject(error);
+                    }
+                    else {
+                        resolve();
+                    }
+                });
+            }
+        });
     },
     printRawData: function (data, onError) {
         if (onError === void 0) { onError = function () {
@@ -244,6 +289,19 @@ export var BLEPrinter = {
             }
         });
     }); },
+    printQrCode: function (qrCode) {
+        return new Promise(function (resolve, reject) {
+            return RNBLEPrinter.printQrCode(qrCode, function (error) {
+                if (error) {
+                    console.warn("printQrCode error:", error);
+                    reject(error);
+                }
+                else {
+                    resolve();
+                }
+            });
+        });
+    },
 };
 export var NetPrinter = {
     init: function () {
@@ -322,6 +380,19 @@ export var NetPrinter = {
             }
         });
     }); },
+    printQrCode: function (qrCode) {
+        return new Promise(function (resolve, reject) {
+            return RNNetPrinter.printQrCode(qrCode, function (error) {
+                if (error) {
+                    console.warn("printQrCode error:", error);
+                    reject(error);
+                }
+                else {
+                    resolve();
+                }
+            });
+        });
+    },
 };
 export var NetPrinterEventEmitter = new NativeEventEmitter(RNNetPrinter);
 export var RN_THERMAL_RECEIPT_PRINTER_EVENTS;

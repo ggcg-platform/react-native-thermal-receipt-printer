@@ -150,6 +150,21 @@ export const USBPrinter = {
 	  const tmp = await imageToBuffer(imagePath);
 	  RNUSBPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
+
+	printQrCode: (qrCode: string): Promise<void> =>
+		new Promise((resolve, reject) =>
+			RNUSBPrinter.printQrCode(
+				qrCode,
+				(error: Error) => {
+					if (error) {
+						console.warn("printQrCode error:", error);
+						reject(error);
+					} else {
+						resolve();
+					}
+				},
+			),
+		),
 };
 
 export const BLEPrinter = {
@@ -276,6 +291,21 @@ export const BLEPrinter = {
 		const tmp = await imageToBuffer(imagePath);
 		RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
+
+	printQrCode: (qrCode: string): Promise<void> =>
+		new Promise((resolve, reject) =>
+			RNBLEPrinter.printQrCode(
+				qrCode,
+				(error: Error) => {
+					if (error) {
+						console.warn("printQrCode error:", error);
+						reject(error);
+					} else {
+						resolve();
+					}
+				},
+			),
+		),
 };
 
 export const NetPrinter = {
@@ -368,6 +398,21 @@ export const NetPrinter = {
 		const tmp = await imageToBuffer(imagePath);
 		RNNetPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
+
+	printQrCode: (qrCode: string): Promise<void> =>
+		new Promise((resolve, reject) =>
+			RNNetPrinter.printQrCode(
+				qrCode,
+				(error: Error) => {
+					if (error) {
+						console.warn("printQrCode error:", error);
+						reject(error);
+					} else {
+						resolve();
+					}
+				},
+			),
+		),
 };
 
 export const NetPrinterEventEmitter = new NativeEventEmitter(RNNetPrinter);

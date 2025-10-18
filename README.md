@@ -79,7 +79,32 @@ import {
 
 USBPrinter.printText("<C>sample text</C>");
 USBPrinter.printBill("<C>sample bill</C>");
+USBPrinter.printQrCode("https://example.com");
 ```
+
+### Available Methods
+
+All printer types (USBPrinter, BLEPrinter, NetPrinter) support the following methods:
+
+- `init()` - Initialize the printer
+- `getDeviceList()` - Get list of available printers
+- `connectPrinter()` - Connect to a specific printer
+- `closeConn()` - Close the connection
+- `printText(text, options)` - Print formatted text
+- `printBill(text, options)` - Print a bill with default formatting
+- `printRawData(data)` - Print raw bytes data
+- `printImage(imagePath)` - Print an image
+- `printQrCode(qrCode)` - Print a QR code (accepts any text string)
+
+#### QR Code Printing
+
+The `printQrCode` method accepts **any text string** as input and generates a QR code (250x250 pixels) centered on the receipt. You can pass:
+
+- **URLs**: `"https://example.com"` or `"https://yourapp.com/order/12345"`
+- **Plain text**: `"Hello World"` or `"Order #12345"`
+- **JSON strings**: `'{"orderId": 123, "customer": "John"}'`
+- **Numbers**: `"123456789"`
+- **Any string data**: Up to QR code capacity limits (depends on data type, typically ~3000 alphanumeric characters)
 
 ## Example
 
@@ -116,6 +141,30 @@ const printBillTest = () => {
 	currentPrinter && USBPrinter.printBill("<C>sample bill</C>");
 }
 
+const printQrCodeTest = async () => {
+	if (currentPrinter) {
+		try {
+			// Example 1: Print a URL
+			await USBPrinter.printQrCode("https://example.com/order/12345");
+
+			// Example 2: Print order/tracking number
+			await USBPrinter.printQrCode("ORDER-2024-001234");
+
+			// Example 3: Print structured data (JSON)
+			const orderData = JSON.stringify({
+				orderId: "12345",
+				date: "2024-01-15",
+				total: 99.99
+			});
+			await USBPrinter.printQrCode(orderData);
+
+			console.log("QR Code printed successfully");
+		} catch (error) {
+			console.error("Print QR Code error:", error);
+		}
+	}
+}
+
 ...
 
 return (
@@ -132,6 +181,9 @@ return (
 		</TouchableOpacity>
 		<TouchableOpacity onPress={printBillTest}>
 			<Text>Print Bill Text</Text>
+		</TouchableOpacity>
+		<TouchableOpacity onPress={printQrCodeTest}>
+			<Text>Print QR Code</Text>
 		</TouchableOpacity>
 	</View>
 )
