@@ -1,12 +1,40 @@
 # choiceqr-react-native-thermal-printer
 
-Fork of `react-native-printer` and add implement for auto connect printer with usb
-A React Native Library to support USB/BLE/Net printer
+A React Native Library to support USB/BLE/Net thermal receipt printers.
+
+## Credits & Attribution
+
+This project is a fork of [karaushu/react-native-thermal-receipt-printer](https://github.com/karaushu/react-native-thermal-receipt-printer), which itself is a fork of the original [react-native-thermal-receipt-printer](https://www.npmjs.com/package/react-native-thermal-receipt-printer).
+
+### Fork History
+
+- **Original**: `react-native-thermal-receipt-printer` - Base thermal printer library
+- **Fork by karaushu**: Added USB auto-connect functionality
+- **This fork (ggcg-platform)**: Added QR code printing support
+
+### What's New in This Fork
+
+- ✅ **QR Code Printing** - `printQrCode()` method for USB/BLE/Net printers
+- ✅ **Promise Support** - Better async/await support for BLE printer methods
+- ✅ **Updated Documentation** - Comprehensive examples and API documentation
+
+Special thanks to [karaushu](https://github.com/karaushu) for the USB auto-connect implementation and all previous contributors.
 
 ## Installation
 
+### Install from GitHub (Recommended)
+
+```bash
+npm install https://github.com/ggcg-platform/react-native-thermal-receipt-printer.git
+
+# Or with yarn
+yarn add https://github.com/ggcg-platform/react-native-thermal-receipt-printer.git
 ```
-npm i choiceqr-react-native-thermal-printer
+
+### iOS Setup
+
+```bash
+cd ios && pod install && cd ..
 ```
 
 ## Troubleshoot
@@ -42,7 +70,7 @@ and comment out code related to Flipper in `ios/AppDelegate.m`
 ## Support
 
 | Printer    | Android            | IOS                |
-|------------|--------------------|--------------------|
+| ---------- | ------------------ | ------------------ |
 | USBPrinter | :heavy_check_mark: |                    |
 | BLEPrinter | :heavy_check_mark: | :heavy_check_mark: |
 | NetPrinter | :heavy_check_mark: | :heavy_check_mark: |
@@ -50,7 +78,7 @@ and comment out code related to Flipper in `ios/AppDelegate.m`
 ## Predefined tag
 
 | Tags |      Description      |
-|:----:|:---------------------:|
+| :--: | :-------------------: |
 |  C   |        Center         |
 |  D   |      Medium font      |
 |  B   |      Large font       |
@@ -72,9 +100,9 @@ yarn bootstrap
 
 ```javascript
 import {
-	USBPrinter,
-	NetPrinter,
-	BLEPrinter,
+  USBPrinter,
+  NetPrinter,
+  BLEPrinter,
 } from "choiceqr-react-native-thermal-printer";
 
 USBPrinter.printText("<C>sample text</C>");
@@ -112,9 +140,9 @@ The `printQrCode` method accepts **any text string** as input and generates a QR
 
 ```typescript
 interface IUSBPrinter {
-	device_name: string;
-	vendor_id: number;
-	product_id: number;
+  device_name: string;
+  vendor_id: number;
+  product_id: number;
 }
 ```
 
@@ -196,8 +224,8 @@ return (
 
 ```typescript
 interface IBLEPrinter {
-	device_name: string;
-	inner_mac_address: string;
+  device_name: string;
+  inner_mac_address: string;
 }
 ```
 
@@ -254,9 +282,9 @@ return (
 
 ```typescript
 interface INetPrinter {
-	device_name: string;
-	host: string;
-	port: number;
+  device_name: string;
+  host: string;
+  port: number;
 }
 ```
 
@@ -318,19 +346,48 @@ render()
 ### With Encoder
 
 ```ts
-  import EscPosEncoder from 'esc-pos-encoder';
-import { errors } from '@sideway/address';
+import EscPosEncoder from "esc-pos-encoder";
+import { errors } from "@sideway/address";
 
 const encoder = new EscPosEncoder();
 
 const printBillTest = () => {
-	const encoderResult = encoder
-		.codepage('windows1251')
-		.text('Iñtërnâtiônàlizætiøn')
-		.codepage('cp737')
-		.text('ξεσκεπάζω την ψυχοφθόρα βδελυγμία')
-		.encode();
-	BLEPrinter.printRawData(encoderResult, (error: Error) => console.log('error callback: ', error));
+  const encoderResult = encoder
+    .codepage("windows1251")
+    .text("Iñtërnâtiônàlizætiøn")
+    .codepage("cp737")
+    .text("ξεσκεπάζω την ψυχοφθόρα βδελυγμία")
+    .encode();
+  BLEPrinter.printRawData(encoderResult, (error: Error) =>
+    console.log("error callback: ", error)
+  );
 };
-
 ```
+
+---
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+ISC License - See package.json for details
+
+## Acknowledgments
+
+- **Original Library**: [react-native-thermal-receipt-printer](https://www.npmjs.com/package/react-native-thermal-receipt-printer)
+- **karaushu**: USB auto-connect implementation
+- **ggcg-platform**: QR code printing support
+- All contributors to the original projects
+
+## Support
+
+If you encounter any issues or have questions:
+- Open an issue on [GitHub](https://github.com/ggcg-platform/react-native-thermal-receipt-printer/issues)
+- Check the [CHANGELOG](CHANGELOG.md) for recent updates
+
+---
+
+**Maintained by**: [ggcg-platform](https://github.com/ggcg-platform)
+**Forked from**: [karaushu/react-native-thermal-receipt-printer](https://github.com/karaushu/react-native-thermal-receipt-printer)
