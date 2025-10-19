@@ -166,9 +166,10 @@ export var USBPrinter = {
             }
         });
     }); },
-    printQrCode: function (qrCode) {
+    printQrCode: function (qrCode, size) {
+        if (size === void 0) { size = 250; }
         return new Promise(function (resolve, reject) {
-            return RNUSBPrinter.printQrCode(qrCode, function (error) {
+            return RNUSBPrinter.printQrCode(qrCode, size, function (error) {
                 if (error) {
                     console.warn("printQrCode error:", error);
                     reject(error);
@@ -289,9 +290,10 @@ export var BLEPrinter = {
             }
         });
     }); },
-    printQrCode: function (qrCode) {
+    printQrCode: function (qrCode, size) {
+        if (size === void 0) { size = 250; }
         return new Promise(function (resolve, reject) {
-            return RNBLEPrinter.printQrCode(qrCode, function (error) {
+            return RNBLEPrinter.printQrCode(qrCode, size, function (error) {
                 if (error) {
                     console.warn("printQrCode error:", error);
                     reject(error);
@@ -380,9 +382,10 @@ export var NetPrinter = {
             }
         });
     }); },
-    printQrCode: function (qrCode) {
+    printQrCode: function (qrCode, size) {
+        if (size === void 0) { size = 250; }
         return new Promise(function (resolve, reject) {
-            return RNNetPrinter.printQrCode(qrCode, function (error) {
+            return RNNetPrinter.printQrCode(qrCode, size, function (error) {
                 if (error) {
                     console.warn("printQrCode error:", error);
                     reject(error);
