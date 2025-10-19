@@ -122,17 +122,28 @@ All printer types (USBPrinter, BLEPrinter, NetPrinter) support the following met
 - `printBill(text, options)` - Print a bill with default formatting
 - `printRawData(data)` - Print raw bytes data
 - `printImage(imagePath)` - Print an image
-- `printQrCode(qrCode)` - Print a QR code (accepts any text string)
+- `printQrCode(qrCode, size)` - Print a QR code (accepts any text string and optional size in pixels)
 
 #### QR Code Printing
 
-The `printQrCode` method accepts **any text string** as input and generates a QR code (250x250 pixels) centered on the receipt. You can pass:
+The `printQrCode` method accepts **any text string** as input and an optional **size parameter** (in pixels). By default, it generates a 250x250 pixel QR code centered on the receipt. You can pass:
 
 - **URLs**: `"https://example.com"` or `"https://yourapp.com/order/12345"`
 - **Plain text**: `"Hello World"` or `"Order #12345"`
 - **JSON strings**: `'{"orderId": 123, "customer": "John"}'`
 - **Numbers**: `"123456789"`
 - **Any string data**: Up to QR code capacity limits (depends on data type, typically ~3000 alphanumeric characters)
+
+**Size Parameter** (optional):
+- Default: `250` pixels (250x250 QR code) when size is not specified or set to 0
+- Recommended sizes for thermal printers:
+  - Small: `200-250px` - Compact QR codes for tight spaces
+  - Medium: `300-350px` - Good balance between size and scannability
+  - Large: `400-450px` - Maximum readability
+  - Maximum: `~500px` - Printer width constraint
+- **Platform Support**: Works on both Android and iOS
+  - Android: Uses native ZXing QR code generation
+  - iOS: Uses Core Image CIQRCodeGenerator with custom size scaling
 
 ## Example
 
@@ -172,19 +183,22 @@ const printBillTest = () => {
 const printQrCodeTest = async () => {
 	if (currentPrinter) {
 		try {
-			// Example 1: Print a URL
+			// Example 1: Print a URL with default size (250x250)
 			await USBPrinter.printQrCode("https://example.com/order/12345");
 
-			// Example 2: Print order/tracking number
-			await USBPrinter.printQrCode("ORDER-2024-001234");
+			// Example 2: Print order/tracking number with custom size
+			await USBPrinter.printQrCode("ORDER-2024-001234", 300);
 
-			// Example 3: Print structured data (JSON)
+			// Example 3: Print large QR code (400x400)
+			await USBPrinter.printQrCode("https://yourapp.com", 400);
+
+			// Example 4: Print structured data (JSON) with medium size
 			const orderData = JSON.stringify({
 				orderId: "12345",
 				date: "2024-01-15",
 				total: 99.99
 			});
-			await USBPrinter.printQrCode(orderData);
+			await USBPrinter.printQrCode(orderData, 350);
 
 			console.log("QR Code printed successfully");
 		} catch (error) {

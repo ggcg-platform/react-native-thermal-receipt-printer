@@ -319,8 +319,8 @@ public class NetPrinterAdapter implements PrinterAdapter {
     }
 
     @Override
-    public void printQrCode(String qrCode, Callback errorCallback) {
-        final Bitmap bitmapImage = TextToQrImageEncode(qrCode);
+    public void printQrCode(String qrCode, Integer size, Callback errorCallback) {
+        final Bitmap bitmapImage = TextToQrImageEncode(qrCode, size);
 
         if (bitmapImage == null) {
             errorCallback.invoke("image not found");
@@ -367,16 +367,19 @@ public class NetPrinterAdapter implements PrinterAdapter {
         }
     }
 
-    private Bitmap TextToQrImageEncode(String Value) {
+    private Bitmap TextToQrImageEncode(String Value, Integer size) {
 
         com.google.zxing.Writer writer = new QRCodeWriter();
 
+        // Use provided size or default to 250
+        int qrSize = (size != null && size > 0) ? size : 250;
+
         BitMatrix bitMatrix = null;
         try {
-            bitMatrix = writer.encode(Value, com.google.zxing.BarcodeFormat.QR_CODE, 250, 250,
+            bitMatrix = writer.encode(Value, com.google.zxing.BarcodeFormat.QR_CODE, qrSize, qrSize,
                     ImmutableMap.of(EncodeHintType.MARGIN, 1));
-            int width = 250;
-            int height = 250;
+            int width = qrSize;
+            int height = qrSize;
             Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 
             for (int i = 0; i < width; i++) {

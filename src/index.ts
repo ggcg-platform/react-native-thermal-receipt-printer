@@ -151,10 +151,11 @@ export const USBPrinter = {
 	  RNUSBPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 
-	printQrCode: (qrCode: string): Promise<void> =>
+	printQrCode: (qrCode: string, size: number = 250): Promise<void> =>
 		new Promise((resolve, reject) =>
 			RNUSBPrinter.printQrCode(
 				qrCode,
+				size,
 				(error: Error) => {
 					if (error) {
 						console.warn("printQrCode error:", error);
@@ -292,10 +293,11 @@ export const BLEPrinter = {
 		RNBLEPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 
-	printQrCode: (qrCode: string): Promise<void> =>
+	printQrCode: (qrCode: string, size: number = 250): Promise<void> =>
 		new Promise((resolve, reject) =>
 			RNBLEPrinter.printQrCode(
 				qrCode,
+				size,
 				(error: Error) => {
 					if (error) {
 						console.warn("printQrCode error:", error);
@@ -399,10 +401,11 @@ export const NetPrinter = {
 		RNNetPrinter.printRawData(tmp, (error: Error) => console.warn(error));
 	},
 
-	printQrCode: (qrCode: string): Promise<void> =>
+	printQrCode: (qrCode: string, size: number = 250): Promise<void> =>
 		new Promise((resolve, reject) =>
 			RNNetPrinter.printQrCode(
 				qrCode,
+				size,
 				(error: Error) => {
 					if (error) {
 						console.warn("printQrCode error:", error);

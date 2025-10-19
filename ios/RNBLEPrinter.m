@@ -7,6 +7,8 @@
 
 
 #import <Foundation/Foundation.h>
+#import <CoreImage/CoreImage.h>
+#import <UIKit/UIKit.h>
 
 #import "RNBLEPrinter.h"
 #import "PrinterSDK.h"
@@ -207,30 +209,55 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
 
 
 RCT_EXPORT_METHOD(printQrCode:(NSString *)qrCode
-                  printerOptions:(NSDictionary *)options
+                  size:(NSInteger)size
                   fail:(RCTResponseSenderBlock)errorCallback) {
     @try {
 
         !m_printer ? [NSException raise:@"Invalid connection" format:@"printRawData: Can't connect to printer"] : nil;
 
-
-        NSString* printerWidthType = [options valueForKey:@"printerWidthType"];
-
-        NSInteger printerWidth = 576;
-
-        if(printerWidthType != nil && [printerWidthType isEqualToString:@"58"]) {
-            printerWidth = 384;
-        }
-
         if(qrCode != nil){
+            [[PrinterSDK defaultPrinterSDK] setPrintWidth:576];
 
-            [[PrinterSDK defaultPrinterSDK] setPrintWidth:printerWidth];
-            [[PrinterSDK defaultPrinterSDK] printQrCode:qrCode ];
+            // If custom size provided, generate QR as image
+            if(size > 0) {
+                UIImage *qrImage = [self generateQRCodeFromString:qrCode withSize:size];
+                if(qrImage) {
+                    [[PrinterSDK defaultPrinterSDK] printImage:qrImage];
+                } else {
+                    // Fallback to default QR code method
+                    [[PrinterSDK defaultPrinterSDK] printQrCode:qrCode];
+                }
+            } else {
+                // Use default SDK QR code method (default size)
+                [[PrinterSDK defaultPrinterSDK] printQrCode:qrCode];
+            }
         }
 
     } @catch (NSException *exception) {
         errorCallback(@[exception.reason]);
     }
+}
+
+- (UIImage *)generateQRCodeFromString:(NSString *)string withSize:(CGFloat)size {
+    NSData *stringData = [string dataUsingEncoding:NSUTF8StringEncoding];
+    CIFilter *qrFilter = [CIFilter filterWithName:@"CIQRCodeGenerator"];
+    [qrFilter setValue:stringData forKey:@"inputMessage"];
+    [qrFilter setValue:@"H" forKey:@"inputCorrectionLevel"];
+
+    CIImage *qrImage = qrFilter.outputImage;
+
+    // Scale the QR code to the desired size
+    CGFloat scaleX = size / qrImage.extent.size.width;
+    CGFloat scaleY = size / qrImage.extent.size.height;
+    CIImage *transformedImage = [qrImage imageByApplyingTransform:CGAffineTransformMakeScale(scaleX, scaleY)];
+
+    // Convert to UIImage
+    CIContext *context = [CIContext contextWithOptions:nil];
+    CGImageRef cgImage = [context createCGImage:transformedImage fromRect:transformedImage.extent];
+    UIImage *image = [UIImage imageWithCGImage:cgImage];
+    CGImageRelease(cgImage);
+
+    return image;
 }
 
 RCT_EXPORT_METHOD(printHex:(NSString *)text
