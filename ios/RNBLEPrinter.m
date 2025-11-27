@@ -44,10 +44,16 @@ RCT_EXPORT_METHOD(getDeviceList:(RCTResponseSenderBlock)successCallback
     @try {
         !_printerArray ? [NSException raise:@"Null pointer exception" format:@"Must call init function first"] : nil;
         [[PrinterSDK defaultPrinterSDK] scanPrintersWithCompletion:^(Printer* printer){
+            if (printer == nil) {
+                return;
+            }
             [_printerArray addObject:printer];
             NSMutableArray *mapped = [NSMutableArray arrayWithCapacity:[_printerArray count]];
             [_printerArray enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                NSDictionary *dict = @{ @"device_name" : printer.name, @"inner_mac_address" : printer.UUIDString};
+                Printer *p = (Printer *)obj;
+                NSString *deviceName = p.name ?: @"Unknown";
+                NSString *macAddress = p.UUIDString ?: @"";
+                NSDictionary *dict = @{ @"device_name" : deviceName, @"inner_mac_address" : macAddress};
                 [mapped addObject:dict];
             }];
             NSMutableArray *uniquearray = (NSMutableArray *)[[NSSet setWithArray:mapped] allObjects];;
@@ -65,8 +71,10 @@ RCT_EXPORT_METHOD(connectPrinter:(NSString *)inner_mac_address
         __block BOOL found = NO;
         __block Printer* selectedPrinter = nil;
         [_printerArray enumerateObjectsUsingBlock: ^(id obj, NSUInteger idx, BOOL *stop){
-            selectedPrinter = (Printer *)obj;
-            if ([inner_mac_address isEqualToString:(selectedPrinter.UUIDString)]) {
+            Printer *p = (Printer *)obj;
+            NSString *uuid = p.UUIDString ?: @"";
+            if ([inner_mac_address isEqualToString:uuid]) {
+                selectedPrinter = p;
                 found = YES;
                 *stop = YES;
             }
@@ -76,7 +84,8 @@ RCT_EXPORT_METHOD(connectPrinter:(NSString *)inner_mac_address
             [[PrinterSDK defaultPrinterSDK] connectBT:selectedPrinter];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"BLEPrinterConnected" object:nil];
             m_printer = selectedPrinter;
-            successCallback(@[[NSString stringWithFormat:@"Connected to printer %@", selectedPrinter.name]]);
+            NSString *printerName = selectedPrinter.name ?: @"Unknown";
+            successCallback(@[[NSString stringWithFormat:@"Connected to printer %@", printerName]]);
         } else {
             [NSException raise:@"Invalid connection" format:@"connectPrinter: Can't connect to printer %@", inner_mac_address];
         }
@@ -135,6 +144,9 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
 
         if(imageData != nil){
             UIImage* image = [UIImage imageWithData:imageData];
+            if (image == nil || image.size.width == 0 || image.size.height == 0) {
+                [NSException raise:@"Invalid image" format:@"Failed to load image from URL"];
+            }
             UIImage* printImage = [self getPrintImage:image printerOptions:options];
 
             [[PrinterSDK defaultPrinterSDK] setPrintWidth:printerWidth];

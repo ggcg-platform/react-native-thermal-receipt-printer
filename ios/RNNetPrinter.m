@@ -35,7 +35,7 @@ NSString *const EVENT_SCANNER_RUNNING = @"scannerRunning";
         // Loop through linked list of interfaces
         temp_addr = interfaces;
         while(temp_addr != NULL) {
-            if(temp_addr->ifa_addr->sa_family == AF_INET) {
+            if(temp_addr->ifa_addr != NULL && temp_addr->ifa_addr->sa_family == AF_INET) {
                 // Check if interface is en0 which is the wifi connection on the iPhone
                 if([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"]) {
                     // Get NSString from C String
@@ -96,8 +96,12 @@ RCT_EXPORT_METHOD(getDeviceList:(RCTResponseSenderBlock)successCallback
         [self sendEventWithName:EVENT_SCANNER_RUNNING body:@YES];
         _printerArray = [NSMutableArray new];
 
-        NSString *prefix = [localIP substringToIndex:([localIP rangeOfString:@"." options:NSBackwardsSearch].location)];
-        NSInteger suffix = [[localIP substringFromIndex:([localIP rangeOfString:@"." options:NSBackwardsSearch].location)] intValue];
+        NSRange lastDotRange = [localIP rangeOfString:@"." options:NSBackwardsSearch];
+        if (lastDotRange.location == NSNotFound) {
+            [NSException raise:@"Network error" format:@"No valid IP address found. Check WiFi connection."];
+        }
+        NSString *prefix = [localIP substringToIndex:lastDotRange.location];
+        NSInteger suffix = [[localIP substringFromIndex:lastDotRange.location + 1] intValue];
 
         for (NSInteger i = 1; i < 255; i++) {
             if (i == suffix) continue;
@@ -189,6 +193,9 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
 
         if(imageData != nil){
             UIImage* image = [UIImage imageWithData:imageData];
+            if (image == nil || image.size.width == 0 || image.size.height == 0) {
+                [NSException raise:@"Invalid image" format:@"Failed to load image from URL"];
+            }
             UIImage* printImage = [self getPrintImage:image printerOptions:options];
 
             [[PrinterSDK defaultPrinterSDK] setPrintWidth:printerWidth];
