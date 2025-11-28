@@ -113,6 +113,9 @@ RCT_EXPORT_METHOD(printRawData:(NSString *)text
 
         // Handle encoding for Chinese characters
         if (encoding != nil && ([encoding isEqualToString:@"GB18030"] || [encoding isEqualToString:@"GBK"] || [encoding isEqualToString:@"GB2312"])) {
+            // Enable Chinese mode: FS & (1C 26)
+            [[PrinterSDK defaultPrinterSDK] sendHex:@"1C26"];
+
             // Convert to GB18030/GBK encoding and send as hex
             NSStringEncoding gbEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
             NSData *encodedData = [text dataUsingEncoding:gbEncoding];

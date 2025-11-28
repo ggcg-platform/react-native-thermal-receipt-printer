@@ -67,13 +67,14 @@ var line_bytes = Buffer.from([10, 10, 10, 10, 10]);
 var encoding_mappings_bytes = {
     // single byte encodings
     "CP437": Buffer.from([27, 116, 0]),
-    // multiple bit encodings
+    // multiple bit encodings - with FS C codepage selection
     "GB18030": Buffer.from([28, 38, 28, 67, 0]),
     "BIG5": Buffer.from([28, 38, 28, 67, 1]),
     "UTF8": Buffer.from([28, 38, 28, 67, 255]),
-    // Raw encodings - no codepage command (for printers that don't support FS & FS C)
-    "GBK": Buffer.from([]),
-    "GB2312": Buffer.from([]),
+    // Chinese mode enabled (FS &) - for printers that need Chinese mode ON
+    // FS & (1C 26) = Enable Chinese mode
+    "GBK": Buffer.from([28, 38]),
+    "GB2312": Buffer.from([28, 38]),
 };
 var options_controller = {
     cut: cut_bytes,
