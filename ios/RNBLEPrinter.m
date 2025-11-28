@@ -98,18 +98,37 @@ RCT_EXPORT_METHOD(printRawData:(NSString *)text
                   printerOptions:(NSDictionary *)options
                   fail:(RCTResponseSenderBlock)errorCallback) {
     @try {
-          NSLog(@"printImageData");
+          NSLog(@"printRawData");
         !m_printer ? [NSException raise:@"Invalid connection" format:@"printRawData: Can't connect to printer"] : nil;
 
         NSNumber* boldPtr = [options valueForKey:@"bold"];
         NSNumber* alignCenterPtr = [options valueForKey:@"center"];
+        NSString* encoding = [options valueForKey:@"encoding"];
 
         BOOL bold = (BOOL)[boldPtr intValue];
         BOOL alignCenter = (BOOL)[alignCenterPtr intValue];
 
         bold ? [[PrinterSDK defaultPrinterSDK] sendHex:@"1B2108"] : [[PrinterSDK defaultPrinterSDK] sendHex:@"1B2100"];
         alignCenter ? [[PrinterSDK defaultPrinterSDK] sendHex:@"1B6102"] : [[PrinterSDK defaultPrinterSDK] sendHex:@"1B6101"];
-        [[PrinterSDK defaultPrinterSDK] printText:text];
+
+        // Handle encoding for Chinese characters
+        if (encoding != nil && ([encoding isEqualToString:@"GB18030"] || [encoding isEqualToString:@"GBK"] || [encoding isEqualToString:@"GB2312"])) {
+            // Convert to GB18030/GBK encoding and send as hex
+            NSStringEncoding gbEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
+            NSData *encodedData = [text dataUsingEncoding:gbEncoding];
+            if (encodedData != nil) {
+                NSMutableString *hexString = [NSMutableString stringWithCapacity:encodedData.length * 2];
+                const unsigned char *bytes = [encodedData bytes];
+                for (NSUInteger i = 0; i < encodedData.length; i++) {
+                    [hexString appendFormat:@"%02X", bytes[i]];
+                }
+                [[PrinterSDK defaultPrinterSDK] sendHex:hexString];
+            } else {
+                [[PrinterSDK defaultPrinterSDK] printText:text];
+            }
+        } else {
+            [[PrinterSDK defaultPrinterSDK] printText:text];
+        }
 
         NSNumber* beepPtr = [options valueForKey:@"beep"];
         NSNumber* cutPtr = [options valueForKey:@"cut"];

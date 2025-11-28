@@ -80,10 +80,13 @@ var billTo64Buffer = function (text, opts) {
     var buffer = EPToolkit.exchange_text(text, options);
     return buffer.toString('base64');
 };
-var textPreprocessingIOS = function (text) {
+var textPreprocessingIOS = function (text, opts) {
+    var _a, _b, _c;
+    if (opts === void 0) { opts = {}; }
     var options = {
-        beep: true,
-        cut: true,
+        beep: (_a = opts.beep) !== null && _a !== void 0 ? _a : true,
+        cut: (_b = opts.cut) !== null && _b !== void 0 ? _b : true,
+        encoding: (_c = opts.encoding) !== null && _c !== void 0 ? _c : 'UTF8',
     };
     return {
         text: text
@@ -206,7 +209,7 @@ export var BLEPrinter = {
         if (opts === void 0) { opts = {}; }
         return new Promise(function (resolve, reject) {
             if (Platform.OS === 'ios') {
-                var processedText = textPreprocessingIOS(text);
+                var processedText = textPreprocessingIOS(text, opts);
                 RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) {
                     if (error) {
                         console.warn("printText error (iOS):", error);
@@ -234,7 +237,7 @@ export var BLEPrinter = {
         if (opts === void 0) { opts = {}; }
         return new Promise(function (resolve, reject) {
             if (Platform.OS === 'ios') {
-                var processedText = textPreprocessingIOS(text);
+                var processedText = textPreprocessingIOS(text, opts);
                 RNBLEPrinter.printRawData(processedText.text, processedText.opts, function (error) {
                     if (error) {
                         console.warn("printBill error (iOS):", error);
@@ -328,7 +331,7 @@ export var NetPrinter = {
     printText: function (text, opts) {
         if (opts === void 0) { opts = {}; }
         if (Platform.OS === 'ios') {
-            var processedText = textPreprocessingIOS(text);
+            var processedText = textPreprocessingIOS(text, opts);
             RNNetPrinter.printRawData(processedText.text, processedText.opts, function (error) { return console.warn(error); });
         }
         else {
@@ -340,7 +343,7 @@ export var NetPrinter = {
     printBill: function (text, opts) {
         if (opts === void 0) { opts = {}; }
         if (Platform.OS === 'ios') {
-            var processedText = textPreprocessingIOS(text);
+            var processedText = textPreprocessingIOS(text, opts);
             RNNetPrinter.printRawData(processedText.text, processedText.opts, function (error) { return console.warn(error); });
         }
         else {

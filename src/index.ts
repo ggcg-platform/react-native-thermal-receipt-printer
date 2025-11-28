@@ -70,10 +70,11 @@ const billTo64Buffer = (text: string, opts: PrinterOptions) => {
 	return buffer.toString('base64');
 };
 
-const textPreprocessingIOS = (text: string) => {
+const textPreprocessingIOS = (text: string, opts: PrinterOptions = {}) => {
 	let options = {
-		beep: true,
-		cut: true,
+		beep: opts.beep ?? true,
+		cut: opts.cut ?? true,
+		encoding: opts.encoding ?? 'UTF8',
 	};
 	return {
 		text: text
@@ -202,7 +203,7 @@ export const BLEPrinter = {
 		printText: (text: string, opts: PrinterOptions = {}): Promise<void> => {
 			return new Promise((resolve, reject) => {
 			  if (Platform.OS === 'ios') {
-				const processedText = textPreprocessingIOS(text);
+				const processedText = textPreprocessingIOS(text, opts);
 				RNBLEPrinter.printRawData(
 				  processedText.text,
 				  processedText.opts,
@@ -234,7 +235,7 @@ export const BLEPrinter = {
 		  printBill: (text: string, opts: PrinterOptions = {}): Promise<void> => {
 			return new Promise((resolve, reject) => {
 			  if (Platform.OS === 'ios') {
-				const processedText = textPreprocessingIOS(text);
+				const processedText = textPreprocessingIOS(text, opts);
 				RNBLEPrinter.printRawData(
 				  processedText.text,
 				  processedText.opts,
@@ -343,7 +344,7 @@ export const NetPrinter = {
 
 	printText: (text: string, opts = {}): void => {
 		if (Platform.OS === 'ios') {
-			const processedText = textPreprocessingIOS(text);
+			const processedText = textPreprocessingIOS(text, opts);
 			RNNetPrinter.printRawData(
 				processedText.text,
 				processedText.opts,
@@ -358,7 +359,7 @@ export const NetPrinter = {
 
 	printBill: (text: string, opts = {}): void => {
 		if (Platform.OS === 'ios') {
-			const processedText = textPreprocessingIOS(text);
+			const processedText = textPreprocessingIOS(text, opts);
 			RNNetPrinter.printRawData(
 				processedText.text,
 				processedText.opts,

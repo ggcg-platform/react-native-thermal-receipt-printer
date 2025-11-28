@@ -71,6 +71,9 @@ var encoding_mappings_bytes = {
     "GB18030": Buffer.from([28, 38, 28, 67, 0]),
     "BIG5": Buffer.from([28, 38, 28, 67, 1]),
     "UTF8": Buffer.from([28, 38, 28, 67, 255]),
+    // Raw encodings - no codepage command (for printers that don't support FS & FS C)
+    "GBK": Buffer.from([]),
+    "GB2312": Buffer.from([]),
 };
 var options_controller = {
     cut: cut_bytes,

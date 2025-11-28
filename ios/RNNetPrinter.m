@@ -159,14 +159,32 @@ RCT_EXPORT_METHOD(printRawData:(NSString *)text
     @try {
         NSNumber* beepPtr = [options valueForKey:@"beep"];
         NSNumber* cutPtr = [options valueForKey:@"cut"];
+        NSString* encoding = [options valueForKey:@"encoding"];
 
         BOOL beep = (BOOL)[beepPtr intValue];
         BOOL cut = (BOOL)[cutPtr intValue];
 
         !connected_ip ? [NSException raise:@"Invalid connection" format:@"Can't connect to printer"] : nil;
 
-        // [[PrinterSDK defaultPrinterSDK] printTestPaper];
-        [[PrinterSDK defaultPrinterSDK] printText:text];
+        // Handle encoding for Chinese characters
+        if (encoding != nil && ([encoding isEqualToString:@"GB18030"] || [encoding isEqualToString:@"GBK"] || [encoding isEqualToString:@"GB2312"])) {
+            // Convert to GB18030/GBK encoding and send as hex
+            NSStringEncoding gbEncoding = CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
+            NSData *encodedData = [text dataUsingEncoding:gbEncoding];
+            if (encodedData != nil) {
+                NSMutableString *hexString = [NSMutableString stringWithCapacity:encodedData.length * 2];
+                const unsigned char *bytes = [encodedData bytes];
+                for (NSUInteger i = 0; i < encodedData.length; i++) {
+                    [hexString appendFormat:@"%02X", bytes[i]];
+                }
+                [[PrinterSDK defaultPrinterSDK] sendHex:hexString];
+            } else {
+                [[PrinterSDK defaultPrinterSDK] printText:text];
+            }
+        } else {
+            [[PrinterSDK defaultPrinterSDK] printText:text];
+        }
+
         beep ? [[PrinterSDK defaultPrinterSDK] beep] : nil;
         cut ? [[PrinterSDK defaultPrinterSDK] cutPaper] : nil;
     } @catch (NSException *exception) {
