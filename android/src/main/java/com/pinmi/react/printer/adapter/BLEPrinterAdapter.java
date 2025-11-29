@@ -76,7 +76,7 @@ public class BLEPrinterAdapter implements PrinterAdapter{
     private static BLEPrinterAdapter mInstance;
 
 
-    private String LOG_TAG = "RNBLEPrinter";
+    private static final String LOG_TAG = "RNBLEPrinter";
 
     private BluetoothDevice mBluetoothDevice;
     private BluetoothSocket mBluetoothSocket;
