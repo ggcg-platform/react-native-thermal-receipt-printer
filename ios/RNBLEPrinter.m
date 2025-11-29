@@ -151,9 +151,22 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
                   printerOptions:(NSDictionary *)options
                   fail:(RCTResponseSenderBlock)errorCallback) {
     @try {
-        NSLog(@"printImageData");
+        NSLog(@"printImageData: %@", imgUrl);
        !m_printer ? [NSException raise:@"Invalid connection" format:@"printRawData: Can't connect to printer"] : nil;
-        NSURL* url = [NSURL URLWithString:imgUrl];
+
+        // Handle both file:// URLs and local file paths
+        NSURL* url;
+        if ([imgUrl hasPrefix:@"/"]) {
+            // Local file path without file:// prefix
+            url = [NSURL fileURLWithPath:imgUrl];
+        } else if ([imgUrl hasPrefix:@"file://"]) {
+            // file:// URL
+            url = [NSURL URLWithString:imgUrl];
+        } else {
+            // HTTP/HTTPS URL
+            url = [NSURL URLWithString:imgUrl];
+        }
+
         NSData* imageData = [NSData dataWithContentsOfURL:url];
 
         NSString* printerWidthType = [options valueForKey:@"printerWidthType"];
@@ -167,12 +180,14 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
         if(imageData != nil){
             UIImage* image = [UIImage imageWithData:imageData];
             if (image == nil || image.size.width == 0 || image.size.height == 0) {
-                [NSException raise:@"Invalid image" format:@"Failed to load image from URL"];
+                [NSException raise:@"Invalid image" format:@"Failed to load image from URL: %@", imgUrl];
             }
             UIImage* printImage = [self getPrintImage:image printerOptions:options];
 
             [[PrinterSDK defaultPrinterSDK] setPrintWidth:printerWidth];
             [[PrinterSDK defaultPrinterSDK] printImage:printImage ];
+        } else {
+            [NSException raise:@"Invalid image" format:@"Failed to load image data from: %@", imgUrl];
         }
 
     } @catch (NSException *exception) {

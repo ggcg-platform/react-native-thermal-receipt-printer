@@ -244,6 +244,14 @@ public class BLEPrinterAdapter implements PrinterAdapter{
 
     public static Bitmap getBitmapFromURL(String src) {
         try {
+            // Check if it's a local file path (file:// URI or absolute path)
+            if (src.startsWith("file://") || src.startsWith("/")) {
+                String filePath = src.startsWith("file://") ? src.substring(7) : src;
+                Bitmap myBitmap = BitmapFactory.decodeFile(filePath);
+                return myBitmap;
+            }
+
+            // Otherwise, treat as HTTP URL
             URL url = new URL(src);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoInput(true);
@@ -257,6 +265,7 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             return myBitmap;
         } catch (IOException e) {
             // Log exception
+            Log.e(LOG_TAG, "Failed to load image from: " + src, e);
             return null;
         }
     }
