@@ -200,13 +200,19 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
 
     NSNumber* nWidth = [options valueForKey:@"imageWidth"];
     NSNumber* nPaddingX = [options valueForKey:@"paddingX"];
+    NSString* printerWidthType = [options valueForKey:@"printerWidthType"];
 
-    CGFloat newWidth = 150;
+    // Default to full printer width (576 for 80mm, 384 for 58mm)
+    CGFloat newWidth = 576;
+    if ([printerWidthType isEqualToString:@"58"]) {
+        newWidth = 384;
+    }
     if(nWidth != nil) {
         newWidth = [nWidth floatValue];
     }
 
-    CGFloat paddingX = 250;
+    // Default to no padding for full width printing
+    CGFloat paddingX = 0;
     if(nPaddingX != nil) {
         paddingX = [nPaddingX floatValue];
     }

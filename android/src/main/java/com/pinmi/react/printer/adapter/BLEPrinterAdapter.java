@@ -273,7 +273,7 @@ public class BLEPrinterAdapter implements PrinterAdapter{
     @Override
     public void printImageData(String imageUrl, Callback errorCallback) {
 
-        final Bitmap bitmapImage = getBitmapFromURL(imageUrl);
+        Bitmap bitmapImage = getBitmapFromURL(imageUrl);
 
         if (bitmapImage == null) {
             errorCallback.invoke("image not found");
@@ -284,10 +284,19 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             return;
         }
 
+        // Scale image to full printer width (576 pixels for 80mm printer)
+        int printerWidth = 576;
+        if (bitmapImage.getWidth() != printerWidth) {
+            float aspectRatio = (float) bitmapImage.getHeight() / (float) bitmapImage.getWidth();
+            int newHeight = Math.round(printerWidth * aspectRatio);
+            bitmapImage = Bitmap.createScaledBitmap(bitmapImage, printerWidth, newHeight, true);
+        }
+
+        final Bitmap finalBitmap = bitmapImage;
         final BluetoothSocket socket = this.mBluetoothSocket;
 
         try {
-            int[][] pixels = getPixelsSlow(bitmapImage);
+            int[][] pixels = getPixelsSlow(finalBitmap);
 
             OutputStream printerOutputStream = socket.getOutputStream();
 
