@@ -244,25 +244,37 @@ public class BLEPrinterAdapter implements PrinterAdapter{
 
     public static Bitmap getBitmapFromURL(String src) {
         try {
-            // Check if it's a local file path (file:// URI or absolute path)
-            if (src.startsWith("file://") || src.startsWith("/")) {
-                String filePath = src.startsWith("file://") ? src.substring(7) : src;
+            // Check if it's a local file path (absolute path starting with /)
+            if (src.startsWith("/")) {
+                Bitmap myBitmap = BitmapFactory.decodeFile(src);
+                return myBitmap;
+            }
+
+            // Check if it's a file:// URI
+            if (src.startsWith("file://")) {
+                String filePath = src.substring(7);
                 Bitmap myBitmap = BitmapFactory.decodeFile(filePath);
                 return myBitmap;
             }
 
-            // Otherwise, treat as HTTP URL
-            URL url = new URL(src);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            // Check if it's an HTTP/HTTPS URL
+            if (src.startsWith("http://") || src.startsWith("https://")) {
+                URL url = new URL(src);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                Bitmap myBitmap = BitmapFactory.decodeStream(input);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            myBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                myBitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
 
-            return myBitmap;
+                return myBitmap;
+            }
+
+            // Unsupported URL scheme
+            Log.e(LOG_TAG, "Unsupported URL scheme: " + src);
+            return null;
         } catch (IOException e) {
             // Log exception
             Log.e(LOG_TAG, "Failed to load image from: " + src, e);
