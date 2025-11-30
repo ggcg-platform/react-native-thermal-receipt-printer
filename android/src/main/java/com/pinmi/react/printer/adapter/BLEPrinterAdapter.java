@@ -284,6 +284,17 @@ public class BLEPrinterAdapter implements PrinterAdapter{
 
     @Override
     public void printImageData(String imageUrl, Callback errorCallback) {
+        // Default to 58mm printer width
+        printImageData(imageUrl, "58", errorCallback);
+    }
+
+    /**
+     * Print image with specified printer width type
+     * @param imageUrl - URL or file path of the image
+     * @param printerWidthType - "58" for 58mm (384px) or "80" for 80mm (576px) printers
+     * @param errorCallback - Error callback (invoked with null on success, error message on failure)
+     */
+    public void printImageData(String imageUrl, String printerWidthType, Callback errorCallback) {
 
         Bitmap bitmapImage = getBitmapFromURL(imageUrl);
 
@@ -296,8 +307,8 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             return;
         }
 
-        // Scale image to full printer width (384 pixels for 58mm printer)
-        int printerWidth = 384;
+        // Determine printer width based on type: 58mm = 384px, 80mm = 576px
+        int printerWidth = "80".equals(printerWidthType) ? 576 : 384;
         float aspectRatio = (float) bitmapImage.getHeight() / (float) bitmapImage.getWidth();
         int newHeight = Math.round(printerWidth * aspectRatio);
         bitmapImage = Bitmap.createScaledBitmap(bitmapImage, printerWidth, newHeight, true);
@@ -331,10 +342,18 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             printerOutputStream.write(SET_LINE_SPACE_32);
             printerOutputStream.write(LINE_FEED);
 
+            // Send cut command (ESC i - partial cut)
+            byte[] CUT_PAPER = new byte[] { 0x1B, 0x69 };
+            printerOutputStream.write(CUT_PAPER);
+
             printerOutputStream.flush();
+
+            // Signal success by invoking callback with null
+            errorCallback.invoke((Object) null);
         } catch (IOException e) {
             Log.e(LOG_TAG, "failed to print data");
             e.printStackTrace();
+            errorCallback.invoke(e.getMessage());
         }
 
     }
@@ -465,18 +484,8 @@ public class BLEPrinterAdapter implements PrinterAdapter{
     }
 
     public static Bitmap resizeTheImageForPrinting(Bitmap image) {
-        // making logo size 150 or less pixels
-        int width = image.getWidth();
-        int height = image.getHeight();
-        if (width > 200 || height > 200) {
-            if (width > height) {
-                float decreaseSizeBy = (200.0f / width);
-                return getBitmapResized(image, decreaseSizeBy);
-            } else {
-                float decreaseSizeBy = (200.0f / height);
-                return getBitmapResized(image, decreaseSizeBy);
-            }
-        }
+        // Return image as-is - scaling is already done in printImageData
+        // The previous 200px limit was causing images to print too small
         return image;
     }
 

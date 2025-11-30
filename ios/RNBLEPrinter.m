@@ -171,23 +171,29 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
 
         NSString* printerWidthType = [options valueForKey:@"printerWidthType"];
 
-        NSInteger printerWidth = 576;
-
-        if(printerWidthType != nil && [printerWidthType isEqualToString:@"58"]) {
-            printerWidth = 384;
+        // Default to 58mm printer (384 pixels), support 80mm (576 pixels)
+        NSInteger printerWidth = 384;
+        if(printerWidthType != nil && [printerWidthType isEqualToString:@"80"]) {
+            printerWidth = 576;
         }
 
         if(imageData != nil){
             UIImage* image = [UIImage imageWithData:imageData];
             if (image == nil || image.size.width == 0 || image.size.height == 0) {
-                [NSException raise:@"Invalid image" format:@"Failed to load image from URL: %@", imgUrl];
+                [NSException raise:@"Invalid image" format:@"Failed to load image from URL"];
             }
             UIImage* printImage = [self getPrintImage:image printerOptions:options];
 
             [[PrinterSDK defaultPrinterSDK] setPrintWidth:printerWidth];
-            [[PrinterSDK defaultPrinterSDK] printImage:printImage ];
+            [[PrinterSDK defaultPrinterSDK] printImage:printImage];
+
+            // Cut paper after printing
+            [[PrinterSDK defaultPrinterSDK] cutPaper];
+
+            // Signal success by invoking callback with nil
+            errorCallback(@[[NSNull null]]);
         } else {
-            [NSException raise:@"Invalid image" format:@"Failed to load image data from: %@", imgUrl];
+            [NSException raise:@"Invalid image" format:@"Failed to load image data from URL"];
         }
 
     } @catch (NSException *exception) {
@@ -202,16 +208,16 @@ RCT_EXPORT_METHOD(printImageData:(NSString *)imgUrl
     NSNumber* nPaddingX = [options valueForKey:@"paddingX"];
     NSString* printerWidthType = [options valueForKey:@"printerWidthType"];
 
-    // Default to full printer width (576 for 80mm, 384 for 58mm)
-    CGFloat newWidth = 576;
-    if ([printerWidthType isEqualToString:@"58"]) {
-        newWidth = 384;
+    // Default to full printer width (384 for 58mm, 576 for 80mm)
+    CGFloat newWidth = 384;
+    if ([printerWidthType isEqualToString:@"80"]) {
+        newWidth = 576;
     }
     if(nWidth != nil) {
         newWidth = [nWidth floatValue];
     }
 
-    // Default to no padding for full width printing
+    // No padding for full width printing
     CGFloat paddingX = 0;
     if(nPaddingX != nil) {
         paddingX = [nPaddingX floatValue];

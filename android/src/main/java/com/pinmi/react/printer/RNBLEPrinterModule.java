@@ -7,6 +7,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.pinmi.react.printer.adapter.BLEPrinterAdapter;
 import com.pinmi.react.printer.adapter.BLEPrinterDeviceId;
@@ -71,6 +72,17 @@ public class RNBLEPrinterModule extends ReactContextBaseJavaModule implements RN
     @Override
     public void printImageData(String imageUrl, Callback errorCallback) {
         adapter.printImageData(imageUrl, errorCallback);
+    }
+
+    @ReactMethod
+    public void printImageDataWithOptions(String imageUrl, ReadableMap options, Callback errorCallback) {
+        // Extract printer width type from options, default to "58"
+        String printerWidthType = "58";
+        if (options != null && options.hasKey("printerWidthType")) {
+            printerWidthType = options.getString("printerWidthType");
+        }
+        // Use the adapter's method with printer width
+        ((BLEPrinterAdapter) adapter).printImageData(imageUrl, printerWidthType, errorCallback);
     }
     @ReactMethod
     @Override
