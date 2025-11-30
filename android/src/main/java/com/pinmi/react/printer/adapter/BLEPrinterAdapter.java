@@ -296,13 +296,11 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             return;
         }
 
-        // Scale image to full printer width (576 pixels for 80mm printer)
-        int printerWidth = 576;
-        if (bitmapImage.getWidth() != printerWidth) {
-            float aspectRatio = (float) bitmapImage.getHeight() / (float) bitmapImage.getWidth();
-            int newHeight = Math.round(printerWidth * aspectRatio);
-            bitmapImage = Bitmap.createScaledBitmap(bitmapImage, printerWidth, newHeight, true);
-        }
+        // Scale image to full printer width (384 pixels for 58mm printer)
+        int printerWidth = 384;
+        float aspectRatio = (float) bitmapImage.getHeight() / (float) bitmapImage.getWidth();
+        int newHeight = Math.round(printerWidth * aspectRatio);
+        bitmapImage = Bitmap.createScaledBitmap(bitmapImage, printerWidth, newHeight, true);
 
         final Bitmap finalBitmap = bitmapImage;
         final BluetoothSocket socket = this.mBluetoothSocket;
